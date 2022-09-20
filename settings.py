@@ -15,8 +15,6 @@ DINING_HALL_PORT = 8080
 
 TIME_UNIT = 1 # s
 
-NR_OF_COOKS = 3
-
 MENU = {
     1: {
         "id": 1,
@@ -108,5 +106,32 @@ MENU = {
         "preparation-time": 30,
         "complexity": 2,
         "cooking-apparatus": "oven"
+    }
+}
+
+COOKS_CONFIGURATIONS = {
+    1: {
+        "rank": 3,
+        "proficiency": 4,
+        "name": None,
+        "catchphrase": None
+    },
+    2: {
+        "rank": 2,
+        "proficiency": 3,
+        "name": None,
+        "catchphrase": None
+    },
+    3: {
+        "rank": 2,
+        "proficiency": 2,
+        "name": None,
+        "catchphrase": None
+    },
+    4: {
+        "rank": 1,
+        "proficiency": 2,
+        "name": None,
+        "catchphrase": None
     }
 }
