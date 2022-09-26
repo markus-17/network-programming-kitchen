@@ -26,6 +26,24 @@ class OrderList:
         3: queue.Queue()
     }
 
+    class Stove:
+        foods_to_prepare = {
+            1: queue.Queue(),
+            2: queue.Queue(),
+            3: queue.Queue()
+        }
+        # In the test configuration there is only 1 Stove
+        stove_lock = threading.Lock()
+
+    class Ovens:
+        foods_to_prepare = {
+            1: queue.Queue(),
+            2: queue.Queue(),
+            3: queue.Queue()
+        }
+        # In the test configuration there are 2 Ovens
+        ovens_semaphore = threading.Semaphore(value=2)
+
     @staticmethod
     def handle_new_order(order):
         order_id = order['order_id']
@@ -36,14 +54,23 @@ class OrderList:
 
         for food_id in order['items']:
             complexity = MENU[food_id]['complexity']
-            OrderList.foods_to_prepare[complexity].put({
-                'food_id': food_id,
-                'order_id': order_id
-            })
+            cooking_apparatus = MENU[food_id]['cooking-apparatus']
 
-    @staticmethod
-    def get_food_to_prepare(cook_rank):
-        return OrderList.foods_to_prepare[cook_rank].get()
+            if cooking_apparatus is None:
+                OrderList.foods_to_prepare[complexity].put({
+                    'food_id': food_id,
+                    'order_id': order_id
+                })
+            elif cooking_apparatus == 'stove':
+                OrderList.Stove.foods_to_prepare[complexity].put({
+                    'food_id': food_id,
+                    'order_id': order_id
+                })
+            elif cooking_apparatus == 'oven':
+                OrderList.Ovens.foods_to_prepare[complexity].put({
+                    'food_id': food_id,
+                    'order_id': order_id
+                })
 
     @staticmethod
     def give_prepared_food(food):
@@ -85,12 +112,47 @@ class CookThread(threading.Thread):
 
     def run(self):
         while True:
-            food = OrderList.get_food_to_prepare(cook_rank=self.rank)
-            food_id = food['food_id']
-            preparation_time = MENU[food_id]['preparation-time'] * TIME_UNIT
-            time.sleep(preparation_time)
-            food["cook_id"] = self.cook_id
-            OrderList.give_prepared_food(food)
+            # Work with the Oven 
+            is_free = OrderList.Ovens.ovens_semaphore.acquire(timeout=0.01*TIME_UNIT)
+            if is_free:
+                for complexity in range(self.rank, 0, -1):
+                    try:
+                        food = OrderList.Ovens.foods_to_prepare[complexity].get_nowait()
+                        self.prepare_food(food)
+                        break
+                    except queue.Empty:
+                        pass
+                    
+                OrderList.Ovens.ovens_semaphore.release()
+
+            # Work with Stove
+            is_free = OrderList.Stove.stove_lock.acquire(timeout=0.01*TIME_UNIT)
+            if is_free:
+                for complexity in range(self.rank, 0, -1):
+                    try:
+                        food = OrderList.Stove.foods_to_prepare[complexity].get_nowait()
+                        self.prepare_food(food)
+                        break
+                    except queue.Empty:
+                        pass
+
+                OrderList.Stove.stove_lock.release()
+
+            # Work with Regular Orders
+            for complexity in range(self.rank, 0, -1):
+                try:
+                    food = OrderList.foods_to_prepare[complexity].get(timeout=0.01*TIME_UNIT)
+                    self.prepare_food(food)
+                    break
+                except queue.Empty:
+                    pass
+
+    def prepare_food(self, food):
+        food_id = food['food_id']
+        preparation_time = MENU[food_id]['preparation-time'] * TIME_UNIT
+        time.sleep(preparation_time)
+        food["cook_id"] = self.cook_id
+        OrderList.give_prepared_food(food)
 
 
 if __name__ == '__main__':
