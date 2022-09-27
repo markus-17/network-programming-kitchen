@@ -12,10 +12,10 @@ The purpose of this **Laboratory Work** was to create a restaurant simulation.
 
 ## Implementation
 
-* If you are reading this version of the `README.md` file, then the implementation is ready for the `70% checkpoint`.
+* If you are reading this version of the `README.md` file, then the implementation is ready for the `100% checkpoint`.
 * The `Dining Hall` and the `Kitchen` components are web servers.
 * The communication between these 2 components was configured.
-* Most of the logic of cooking orders in the `Kitchen` is ready. Multiple Cooks are preparing foods from multiple orders according to their complexity.
+* The logic of cooking orders in the `Kitchen` is ready. Multiple Cooks are preparing foods from multiple orders according to their complexity. Cooking Apparatus rules are implemented.
 
 ## How to run the project using Docker?
 
