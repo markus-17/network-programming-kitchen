@@ -135,3 +135,6 @@ COOKS_CONFIGURATIONS = {
         "catchphrase": None
     }
 }
+
+def kitchen_print(msg, color=COLORS.OKGREEN):
+    print(f'{color}|-- KITCHEN --->>> {msg}')
