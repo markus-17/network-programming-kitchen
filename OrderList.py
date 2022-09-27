@@ -9,6 +9,7 @@ from settings import MENU, kitchen_print, TIME_UNIT, KITCHEN_HOSTNAME, DINING_HA
 
 
 class OrderList:
+    orders_priority_queue = queue.PriorityQueue()
     orders_in_progress_lock = threading.Lock()
     orders_in_progress = {}
     foods_to_prepare = {
@@ -36,7 +37,8 @@ class OrderList:
         ovens_semaphore = threading.Semaphore(value=2)
 
     @staticmethod
-    def handle_new_order(order):
+    def handle_new_order():
+        _, order = OrderList.orders_priority_queue.get()
         order_id = order['order_id']
         order['cooking_details'] = []
 

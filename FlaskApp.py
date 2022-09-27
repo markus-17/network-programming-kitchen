@@ -12,5 +12,6 @@ def post_order():
     kitchen_print(
         f'Received from Table_{order["table_id"]} using Waiter_{order["waiter_id"]} Order_{order["order_id"]} with items {order["items"]}'
     )
-    OrderList.handle_new_order(order)
+    OrderList.orders_priority_queue.put((order['priority'], order))
+    OrderList.handle_new_order()
     return {'status_code': 200}
