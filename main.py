@@ -3,10 +3,13 @@ import itertools
 
 from FlaskApp import flask_app
 from CookThread import CookThread
-from settings import KITCHEN_PORT, COOKS_CONFIGURATIONS
+from CookThread import Oven, Stove
+from settings import KITCHEN_PORT, COOKS_CONFIGURATIONS, NR_OF_OVENS, NR_OF_STOVES
 
 
 cook_threads = []
+oven_threads = []
+stove_threads = []
 
 if __name__ == '__main__':
     server_thread = threading.Thread(
@@ -14,10 +17,16 @@ if __name__ == '__main__':
             host='0.0.0.0', port=KITCHEN_PORT, debug=False, use_reloader=False)
     )
 
+    for _ in range(NR_OF_OVENS):
+        oven_threads.append(Oven())
+
+    for _ in range(NR_OF_STOVES):
+        stove_threads.append(Stove())
+
     for cook_id, cook_configuration in COOKS_CONFIGURATIONS.items():
         for _ in range(cook_configuration["proficiency"]):
             cook_thread = CookThread(cook_id, cook_configuration['rank'])
             cook_threads.append(cook_thread)
 
-    for thread in itertools.chain([server_thread], cook_threads):
+    for thread in itertools.chain(oven_threads, stove_threads, [server_thread], cook_threads):
         thread.start()
