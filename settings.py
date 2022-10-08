@@ -14,6 +14,8 @@ KITCHEN_HOSTNAME = 'dining_hall' if os.getenv(
 DINING_HALL_PORT = 8080
 
 TIME_UNIT = 1 # s
+NR_OF_OVENS = 2
+NR_OF_STOVES = 1
 
 MENU = {
     1: {

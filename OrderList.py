@@ -12,29 +12,9 @@ class OrderList:
     orders_priority_queue = queue.PriorityQueue()
     orders_in_progress_lock = threading.Lock()
     orders_in_progress = {}
-    foods_to_prepare = {
-        1: queue.Queue(),
-        2: queue.Queue(),
-        3: queue.Queue()
-    }
-
-    class Stove:
-        foods_to_prepare = {
-            1: queue.Queue(),
-            2: queue.Queue(),
-            3: queue.Queue()
-        }
-        # In the test configuration there is only 1 Stove
-        stove_lock = threading.Lock()
-
-    class Ovens:
-        foods_to_prepare = {
-            1: queue.Queue(),
-            2: queue.Queue(),
-            3: queue.Queue()
-        }
-        # In the test configuration there are 2 Ovens
-        ovens_semaphore = threading.Semaphore(value=2)
+    foods_to_prepare = { k: queue.Queue() for k in (1, 2, 3) }
+    cooking_apparatus_to_prepare_foods = { k: queue.Queue() for k in (1, 2, 3) }
+    cooking_apparatus_ready_foods = queue.Queue()
 
     @staticmethod
     def handle_new_order():
@@ -54,13 +34,8 @@ class OrderList:
                     'food_id': food_id,
                     'order_id': order_id
                 })
-            elif cooking_apparatus == 'stove':
-                OrderList.Stove.foods_to_prepare[complexity].put({
-                    'food_id': food_id,
-                    'order_id': order_id
-                })
-            elif cooking_apparatus == 'oven':
-                OrderList.Ovens.foods_to_prepare[complexity].put({
+            else:
+                OrderList.cooking_apparatus_to_prepare_foods[complexity].put({
                     'food_id': food_id,
                     'order_id': order_id
                 })
@@ -85,3 +60,15 @@ class OrderList:
                 url=f'http://{KITCHEN_HOSTNAME}:{DINING_HALL_PORT}/distribution',
                 json=order_in_progress
             )
+
+    @staticmethod
+    def submit_cooking_apparatus_prepared_foods(food=None):
+        if food is not None:
+            OrderList.cooking_apparatus_ready_foods.put(food)
+
+        while True:
+            try: 
+                food = OrderList.cooking_apparatus_ready_foods.get_nowait()
+                OrderList.give_prepared_food(food)
+            except queue.Empty:
+                break
