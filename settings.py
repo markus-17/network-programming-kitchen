@@ -5,6 +5,7 @@ class COLORS:
     # https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
     OKGREEN = '\033[92m'
     OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
 
 
 KITCHEN_PORT = 3000
@@ -14,6 +15,9 @@ KITCHEN_HOSTNAME = 'dining_hall' if os.getenv(
 DINING_HALL_PORT = 8080
 
 TIME_UNIT = 1 # s
+
+NR_OF_STOVES = 1
+NR_OF_OVENS = 2
 
 MENU = {
     1: {
