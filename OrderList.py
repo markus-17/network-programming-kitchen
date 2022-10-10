@@ -5,7 +5,7 @@ import threading
 
 import requests
 
-from settings import MENU, kitchen_print, TIME_UNIT, KITCHEN_HOSTNAME, DINING_HALL_PORT
+from settings import MENU, kitchen_print, TIME_UNIT, DINING_HALL_HOSTNAME, DINING_HALL_PORT
 
 
 class OrderList:
@@ -57,7 +57,7 @@ class OrderList:
             cooks = set(food['cook_id'] for food in order_in_progress['cooking_details'])
             kitchen_print(f'The food for Table_{order_in_progress["table_id"]}, Waiter_{order_in_progress["waiter_id"]}, Order_{order_in_progress["order_id"]} was prepared by these cooks {cooks} in {order_in_progress["cooking_time"]} time units.')
             requests.post(
-                url=f'http://{KITCHEN_HOSTNAME}:{DINING_HALL_PORT}/distribution',
+                url=f'http://{DINING_HALL_HOSTNAME}:{DINING_HALL_PORT}/distribution',
                 json=order_in_progress
             )
 
